@@ -50,4 +50,9 @@ public class AccountController {
 
         return ResponseEntity.ok(AccountResponse.from(account));
     }
+
+    @GetMapping("/passenger-test")
+    public ResponseEntity<String> passengerTest() {
+        return ResponseEntity.ok("Passenger access granted");
+    }
 }

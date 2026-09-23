@@ -35,12 +35,21 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(
+                                        HttpServletResponse.SC_FORBIDDEN,
+                                        "Forbidden"
+                                )
+                        )
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/accounts/register",
-                                "/api/accounts/login"
+                                "/api/accounts/login",
+                                "/error"
                         ).permitAll()
+                        .requestMatchers("/api/accounts/passenger-test")
+                        .hasRole("PASSENGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
