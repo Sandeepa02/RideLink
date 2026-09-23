@@ -1,6 +1,7 @@
 package com.ridelink.account.security;
 
 import com.ridelink.account.model.Account;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
@@ -35,5 +36,29 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
                 .compact();
+    }
+
+    public String extractUsername(String token) {
+
+        return extractAllClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private Claims extractAllClaims(String token) {
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

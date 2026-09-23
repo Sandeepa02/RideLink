@@ -8,6 +8,7 @@ import com.ridelink.account.model.Account;
 import jakarta.validation.Valid;
 import com.ridelink.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,5 +38,16 @@ public class AccountController {
         return ResponseEntity.ok(
                 new LoginResponse(token, "Bearer")
         );
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<AccountResponse> getMyProfile(
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        Account account = accountService.getByEmail(email);
+
+        return ResponseEntity.ok(AccountResponse.from(account));
     }
 }

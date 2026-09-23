@@ -2,6 +2,7 @@ package com.ridelink.account.service;
 
 import com.ridelink.account.dto.LoginRequest;
 import com.ridelink.account.dto.RegisterRequest;
+import com.ridelink.account.dto.AccountResponse;
 import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
 import com.ridelink.account.repository.AccountRepository;
@@ -62,5 +63,12 @@ public class AccountService {
         }
 
         return jwtService.generateToken(account);
+    }
+
+    public Account getByEmail(String email) {
+
+    return accountRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new IllegalArgumentException("Account not found"));
     }
 }

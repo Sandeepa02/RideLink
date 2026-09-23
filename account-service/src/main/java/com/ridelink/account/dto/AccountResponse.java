@@ -4,6 +4,7 @@ import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
 import com.ridelink.account.model.Role;
 
+
 public class AccountResponse {
 
     private String id;
