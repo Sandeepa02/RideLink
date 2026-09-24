@@ -4,6 +4,7 @@ import com.ridelink.account.dto.AccountResponse;
 import com.ridelink.account.dto.RegisterRequest;
 import com.ridelink.account.dto.LoginRequest;
 import com.ridelink.account.dto.LoginResponse;
+import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.model.Account;
 import jakarta.validation.Valid;
 import com.ridelink.account.service.AccountService;
@@ -51,8 +52,15 @@ public class AccountController {
         return ResponseEntity.ok(AccountResponse.from(account));
     }
 
-    @GetMapping("/passenger-test")
-    public ResponseEntity<String> passengerTest() {
-        return ResponseEntity.ok("Passenger access granted");
+    @PutMapping("/me")
+    public ResponseEntity<AccountResponse> updateMyProfile(
+            Authentication authentication,
+            @Valid @RequestBody UpdateProfileRequest request) {
+
+        String email = authentication.getName();
+
+        Account account = accountService.updateProfile(email, request);
+
+        return ResponseEntity.ok(AccountResponse.from(account));
     }
 }

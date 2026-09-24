@@ -3,6 +3,7 @@ package com.ridelink.account.service;
 import com.ridelink.account.dto.LoginRequest;
 import com.ridelink.account.dto.RegisterRequest;
 import com.ridelink.account.dto.AccountResponse;
+import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
 import com.ridelink.account.repository.AccountRepository;
@@ -70,5 +71,16 @@ public class AccountService {
     return accountRepository.findByEmail(email)
             .orElseThrow(() ->
                     new IllegalArgumentException("Account not found"));
+    }
+
+    public Account updateProfile(String email, UpdateProfileRequest request) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Account not found"));
+
+        account.setFullName(request.getFullName());
+        account.setPhone(request.getPhone());
+
+        return accountRepository.save(account);
     }
 }
