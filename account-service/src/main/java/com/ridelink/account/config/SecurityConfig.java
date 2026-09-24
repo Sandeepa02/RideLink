@@ -48,8 +48,6 @@ public class SecurityConfig {
                                 "/api/accounts/login",
                                 "/error"
                         ).permitAll()
-                        .requestMatchers("/api/accounts/passenger-test")
-                        .hasRole("PASSENGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
