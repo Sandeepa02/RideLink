@@ -5,11 +5,13 @@ import com.ridelink.account.dto.RegisterRequest;
 import com.ridelink.account.dto.LoginRequest;
 import com.ridelink.account.dto.LoginResponse;
 import com.ridelink.account.dto.UpdateProfileRequest;
+import com.ridelink.account.dto.UpdateRoleRequest;
 import com.ridelink.account.model.Account;
 import jakarta.validation.Valid;
 import com.ridelink.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -60,6 +62,17 @@ public class AccountController {
         String email = authentication.getName();
 
         Account account = accountService.updateProfile(email, request);
+
+        return ResponseEntity.ok(AccountResponse.from(account));
+    }
+
+    @PutMapping("/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AccountResponse> updateRole(
+            @RequestParam String email,
+            @Valid @RequestBody UpdateRoleRequest request) {
+
+        Account account = accountService.updateRole(email, request);
 
         return ResponseEntity.ok(AccountResponse.from(account));
     }
