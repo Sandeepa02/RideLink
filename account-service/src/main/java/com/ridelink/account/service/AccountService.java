@@ -6,6 +6,9 @@ import com.ridelink.account.dto.AccountResponse;
 import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.dto.UpdateRoleRequest;
 import com.ridelink.account.dto.UpdateStatusRequest;
+import com.ridelink.account.exception.AccountNotFoundException;
+import com.ridelink.account.exception.InvalidCredentialsException;
+import com.ridelink.account.exception.AccountNotActiveException;
 import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
 import com.ridelink.account.model.Role;
@@ -58,17 +61,17 @@ public class AccountService {
 
         Account account = accountRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Invalid email or password"));
+                        new InvalidCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 account.getPassword())) {
 
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
 
         if (account.getStatus() != AccountStatus.ACTIVE) {
-            throw new IllegalArgumentException("Account is not active");
+            throw new AccountNotActiveException("Account is not active");
         }
 
         return jwtService.generateToken(account);
@@ -78,13 +81,13 @@ public class AccountService {
 
     return accountRepository.findByEmail(email)
             .orElseThrow(() ->
-                    new IllegalArgumentException("Account not found"));
+                    new AccountNotFoundException("Account not found"));
     }
 
     public Account updateProfile(String email, UpdateProfileRequest request) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Account not found"));
+                        new AccountNotFoundException("Account not found"));
 
         account.setFullName(request.getFullName());
         account.setPhone(request.getPhone());
@@ -95,7 +98,7 @@ public class AccountService {
     public Account updateRole(String email, UpdateRoleRequest request) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Account not found"));
+                        new AccountNotFoundException("Account not found"));
 
         account.setRole(request.getRole());
 
@@ -105,7 +108,7 @@ public class AccountService {
     public Account updateStatus(String email, UpdateStatusRequest request) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Account not found"));
+                        new AccountNotFoundException("Account not found"));
 
         account.setStatus(request.getStatus());
 
