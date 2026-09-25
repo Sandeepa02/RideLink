@@ -7,6 +7,7 @@ import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.dto.UpdateRoleRequest;
 import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
+import com.ridelink.account.model.Role;
 import com.ridelink.account.repository.AccountRepository;
 import com.ridelink.account.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,11 @@ public class AccountService {
 
         if (accountRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already registered");
+        }
+
+        if (request.getRole() == Role.ADMIN &&
+                accountRepository.existsByRole(Role.ADMIN)) {
+            throw new IllegalArgumentException("An ADMIN account already exists");
         }
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());
