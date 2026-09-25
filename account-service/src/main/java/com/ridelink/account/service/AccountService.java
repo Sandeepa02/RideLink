@@ -5,6 +5,7 @@ import com.ridelink.account.dto.RegisterRequest;
 import com.ridelink.account.dto.AccountResponse;
 import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.dto.UpdateRoleRequest;
+import com.ridelink.account.dto.UpdateStatusRequest;
 import com.ridelink.account.model.Account;
 import com.ridelink.account.model.AccountStatus;
 import com.ridelink.account.model.Role;
@@ -97,6 +98,16 @@ public class AccountService {
                         new IllegalArgumentException("Account not found"));
 
         account.setRole(request.getRole());
+
+        return accountRepository.save(account);
+    }
+
+    public Account updateStatus(String email, UpdateStatusRequest request) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Account not found"));
+
+        account.setStatus(request.getStatus());
 
         return accountRepository.save(account);
     }

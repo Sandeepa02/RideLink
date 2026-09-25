@@ -6,6 +6,7 @@ import com.ridelink.account.dto.LoginRequest;
 import com.ridelink.account.dto.LoginResponse;
 import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.dto.UpdateRoleRequest;
+import com.ridelink.account.dto.UpdateStatusRequest;
 import com.ridelink.account.model.Account;
 import jakarta.validation.Valid;
 import com.ridelink.account.service.AccountService;
@@ -73,6 +74,17 @@ public class AccountController {
             @Valid @RequestBody UpdateRoleRequest request) {
 
         Account account = accountService.updateRole(email, request);
+
+        return ResponseEntity.ok(AccountResponse.from(account));
+    }
+
+    @PutMapping("/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AccountResponse> updateStatus(
+            @RequestParam String email,
+            @Valid @RequestBody UpdateStatusRequest request) {
+
+        Account account = accountService.updateStatus(email, request);
 
         return ResponseEntity.ok(AccountResponse.from(account));
     }
