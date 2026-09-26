@@ -33,6 +33,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+          cache-dependency-path: |
+            account-service/pom.xml
+            driver-service/pom.xml
+            ride-service/pom.xml
+            fare-payment-service/pom.xml
 
       # Steps 3-6: Build and test each microservice separately.
       # Running them one-by-one makes the logs show exactly which service failed.
