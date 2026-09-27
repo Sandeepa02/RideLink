@@ -4,47 +4,51 @@ import com.ridelink.fare.dto.FareEstimateRequest;
 import com.ridelink.fare.dto.FareEstimateResponse;
 import com.ridelink.fare.dto.FinalFareRequest;
 import com.ridelink.fare.dto.FinalFareResponse;
-import com.ridelink.fare.service.FareCalculationService;
+import com.ridelink.fare.model.Fare;
+import com.ridelink.fare.service.FareService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/fares")
 public class FareController {
 
-    private final FareCalculationService fareCalculationService;
+    private final FareService fareService;
 
-    public FareController(FareCalculationService fareCalculationService) {
-        this.fareCalculationService = fareCalculationService;
-    }
-
-
-    @PostMapping("/final")
-    public FinalFareResponse calculateFinalFare(
-            @RequestBody FinalFareRequest request) {
-
-        double finalFare = fareCalculationService.calculateFare(
-                request.getDistanceKm(),
-                request.getDurationMinutes()
-        );
-
-        return new FinalFareResponse(
-                request.getRideId(),
-                finalFare
-        );
+    public FareController(FareService fareService) {
+        this.fareService = fareService;
     }
 
     @PostMapping("/estimate")
     public FareEstimateResponse estimateFare(
             @RequestBody FareEstimateRequest request) {
 
-        double estimatedFare = fareCalculationService.calculateFare(
+        Fare fare = fareService.createFare(
+                request.getRideId(),
                 request.getDistanceKm(),
-                request.getEstimatedDurationMinutes()
+                request.getEstimatedDurationMinutes(),
+                "ESTIMATE"
         );
 
         return new FareEstimateResponse(
+                fare.getRideId(),
+                fare.getTotalFare()
+        );
+    }
+
+    @PostMapping("/final")
+    public FinalFareResponse calculateFinalFare(
+            @RequestBody FinalFareRequest request) {
+
+        Fare fare = fareService.createFare(
                 request.getRideId(),
-                estimatedFare
+                request.getDistanceKm(),
+                request.getDurationMinutes(),
+                "FINAL"
+        );
+
+        return new FinalFareResponse(
+                fare.getRideId(),
+                fare.getTotalFare()
         );
     }
 }
