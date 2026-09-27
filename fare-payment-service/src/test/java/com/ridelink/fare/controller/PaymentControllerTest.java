@@ -6,6 +6,10 @@ import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.service.PaymentService;
 import org.junit.jupiter.api.Test;
 import com.ridelink.fare.dto.ReceiptResponse;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -126,5 +130,25 @@ class PaymentControllerTest {
 
         verify(service, times(1))
                 .generateReceipt("PAY-001");
+    }
+
+    @Test
+    void shouldRejectInvalidPaymentRequest() {
+
+        Validator validator = Validation
+                .buildDefaultValidatorFactory()
+                .getValidator();
+
+        PaymentRequest request = new PaymentRequest();
+
+        request.setRideId("");
+        request.setFareId("");
+        request.setAmount(0);
+        request.setPaymentMethod("");
+
+        Set<ConstraintViolation<PaymentRequest>> violations =
+                validator.validate(request);
+
+        assertEquals(4, violations.size());
     }
 }

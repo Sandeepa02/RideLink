@@ -5,6 +5,7 @@ import com.ridelink.fare.dto.PaymentResponse;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.service.PaymentService;
 import com.ridelink.fare.dto.ReceiptResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,7 @@ public class PaymentController {
 
     @PostMapping
     public PaymentResponse processPayment(
-            @RequestBody PaymentRequest request) {
+        @Valid @RequestBody PaymentRequest request) {
 
         Payment payment = paymentService.processPayment(
                 request.getRideId(),

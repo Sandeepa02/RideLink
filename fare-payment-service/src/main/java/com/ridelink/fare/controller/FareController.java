@@ -6,6 +6,7 @@ import com.ridelink.fare.dto.FinalFareRequest;
 import com.ridelink.fare.dto.FinalFareResponse;
 import com.ridelink.fare.model.Fare;
 import com.ridelink.fare.service.FareService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,7 +38,7 @@ public class FareController {
 
     @PostMapping("/final")
     public FinalFareResponse calculateFinalFare(
-            @RequestBody FinalFareRequest request) {
+            @Valid @RequestBody FinalFareRequest request) {
 
         Fare fare = fareService.createFare(
                 request.getRideId(),

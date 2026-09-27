@@ -1,10 +1,20 @@
 package com.ridelink.fare.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
 public class PaymentRequest {
 
+    @NotBlank(message = "Ride ID is required")
     private String rideId;
+
+    @NotBlank(message = "Fare ID is required")
     private String fareId;
+
+    @Positive(message = "Amount must be greater than zero")
     private double amount;
+
+    @NotBlank(message = "Payment method is required")
     private String paymentMethod;
 
     public PaymentRequest() {
