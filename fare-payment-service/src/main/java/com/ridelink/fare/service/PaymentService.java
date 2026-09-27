@@ -39,4 +39,11 @@ public class PaymentService {
 
         return paymentRepository.save(payment);
     }
+
+    public Payment getPaymentById(String paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() ->
+                        new RuntimeException("Payment not found: " + paymentId)
+                );
+    }
 }

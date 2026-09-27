@@ -74,4 +74,33 @@ class PaymentServiceTest {
 
         verify(repository, times(1)).save(any(Payment.class));
     }
+    
+    @Test
+    void shouldRetrievePaymentById() {
+
+        PaymentRepository repository = mock(PaymentRepository.class);
+
+        Payment payment = new Payment(
+                "RID-001",
+                "FARE-001",
+                785.0,
+                "CARD",
+                "SUCCESS",
+                null
+        );
+
+        when(repository.findById("PAY-001"))
+                .thenReturn(java.util.Optional.of(payment));
+
+        PaymentService service = new PaymentService(repository);
+
+        Payment result = service.getPaymentById("PAY-001");
+
+        assertEquals("RID-001", result.getRideId());
+        assertEquals("FARE-001", result.getFareId());
+        assertEquals(785.0, result.getAmount());
+        assertEquals("SUCCESS", result.getStatus());
+
+        verify(repository, times(1)).findById("PAY-001");
+    }
 }

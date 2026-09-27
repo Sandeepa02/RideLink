@@ -57,4 +57,36 @@ class PaymentControllerTest {
                 "CARD"
         );
     }
+
+    @Test
+    void shouldRetrievePaymentById() {
+
+        PaymentService service = mock(PaymentService.class);
+
+        Payment payment = new Payment(
+                "RID-001",
+                "FARE-001",
+                785.0,
+                "CARD",
+                "SUCCESS",
+                LocalDateTime.now()
+        );
+
+        when(service.getPaymentById("PAY-001"))
+                .thenReturn(payment);
+
+        PaymentController controller = new PaymentController(service);
+
+        PaymentResponse response =
+                controller.getPayment("PAY-001");
+
+        assertEquals("RID-001", response.getRideId());
+        assertEquals("FARE-001", response.getFareId());
+        assertEquals(785.0, response.getAmount());
+        assertEquals("CARD", response.getPaymentMethod());
+        assertEquals("SUCCESS", response.getStatus());
+
+        verify(service, times(1))
+                .getPaymentById("PAY-001");
+    }
 }

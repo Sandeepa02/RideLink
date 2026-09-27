@@ -36,4 +36,19 @@ public class PaymentController {
                 payment.getStatus()
         );
     }
+
+    @GetMapping("/{paymentId}")
+    public PaymentResponse getPayment(@PathVariable String paymentId) {
+
+        Payment payment = paymentService.getPaymentById(paymentId);
+
+        return new PaymentResponse(
+                payment.getId(),
+                payment.getRideId(),
+                payment.getFareId(),
+                payment.getAmount(),
+                payment.getPaymentMethod(),
+                payment.getStatus()
+        );
+    }
 }
