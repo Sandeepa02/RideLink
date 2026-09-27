@@ -2,6 +2,8 @@ package com.ridelink.fare.controller;
 
 import com.ridelink.fare.dto.FareEstimateRequest;
 import com.ridelink.fare.dto.FareEstimateResponse;
+import com.ridelink.fare.dto.FinalFareRequest;
+import com.ridelink.fare.dto.FinalFareResponse;
 import com.ridelink.fare.service.FareCalculationService;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,22 @@ public class FareController {
 
     public FareController(FareCalculationService fareCalculationService) {
         this.fareCalculationService = fareCalculationService;
+    }
+
+
+    @PostMapping("/final")
+    public FinalFareResponse calculateFinalFare(
+            @RequestBody FinalFareRequest request) {
+
+        double finalFare = fareCalculationService.calculateFare(
+                request.getDistanceKm(),
+                request.getDurationMinutes()
+        );
+
+        return new FinalFareResponse(
+                request.getRideId(),
+                finalFare
+        );
     }
 
     @PostMapping("/estimate")
