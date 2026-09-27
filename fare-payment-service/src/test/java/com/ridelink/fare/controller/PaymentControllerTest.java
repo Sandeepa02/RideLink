@@ -5,6 +5,7 @@ import com.ridelink.fare.dto.PaymentResponse;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.service.PaymentService;
 import org.junit.jupiter.api.Test;
+import com.ridelink.fare.dto.ReceiptResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -88,5 +89,42 @@ class PaymentControllerTest {
 
         verify(service, times(1))
                 .getPaymentById("PAY-001");
+    }
+
+    @Test
+    void shouldGetPaymentReceipt() {
+
+        PaymentService service = mock(PaymentService.class);
+
+        ReceiptResponse receipt = new ReceiptResponse(
+                "PAY-001",
+                "RID-001",
+                785.0,
+                "CARD",
+                "SUCCESS",
+                "Payment completed successfully"
+        );
+
+        when(service.generateReceipt("PAY-001"))
+                .thenReturn(receipt);
+
+        PaymentController controller =
+                new PaymentController(service);
+
+        ReceiptResponse response =
+                controller.getReceipt("PAY-001");
+
+        assertEquals("PAY-001", response.getPaymentId());
+        assertEquals("RID-001", response.getRideId());
+        assertEquals(785.0, response.getAmount());
+        assertEquals("CARD", response.getPaymentMethod());
+        assertEquals("SUCCESS", response.getStatus());
+        assertEquals(
+                "Payment completed successfully",
+                response.getReceiptMessage()
+        );
+
+        verify(service, times(1))
+                .generateReceipt("PAY-001");
     }
 }

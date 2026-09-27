@@ -1,5 +1,6 @@
 package com.ridelink.fare.service;
 
+import com.ridelink.fare.dto.ReceiptResponse;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -46,4 +47,27 @@ public class PaymentService {
                         new RuntimeException("Payment not found: " + paymentId)
                 );
     }
+
+    public ReceiptResponse generateReceipt(String paymentId) {
+
+        Payment payment = getPaymentById(paymentId);
+
+        String receiptMessage;
+
+        if ("SUCCESS".equals(payment.getStatus())) {
+            receiptMessage = "Payment completed successfully";
+        } else {
+            receiptMessage = "Payment was not completed";
+        }
+
+        return new ReceiptResponse(
+                payment.getId(),
+                payment.getRideId(),
+                payment.getAmount(),
+                payment.getPaymentMethod(),
+                payment.getStatus(),
+                receiptMessage
+        );
+    }
+
 }

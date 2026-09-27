@@ -4,6 +4,7 @@ import com.ridelink.fare.dto.PaymentRequest;
 import com.ridelink.fare.dto.PaymentResponse;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.service.PaymentService;
+import com.ridelink.fare.dto.ReceiptResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,5 +51,11 @@ public class PaymentController {
                 payment.getPaymentMethod(),
                 payment.getStatus()
         );
+    }
+
+    @GetMapping("/{paymentId}/receipt")
+    public ReceiptResponse getReceipt(@PathVariable String paymentId) {
+
+        return paymentService.generateReceipt(paymentId);
     }
 }

@@ -1,5 +1,6 @@
 package com.ridelink.fare.service;
 
+import com.ridelink.fare.dto.ReceiptResponse;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,40 @@ class PaymentServiceTest {
         assertEquals("FARE-001", result.getFareId());
         assertEquals(785.0, result.getAmount());
         assertEquals("SUCCESS", result.getStatus());
+
+        verify(repository, times(1)).findById("PAY-001");
+    }
+
+    @Test
+    void shouldGenerateReceiptForSuccessfulPayment() {
+
+        PaymentRepository repository = mock(PaymentRepository.class);
+
+        Payment payment = new Payment(
+                "RID-001",
+                "FARE-001",
+                785.0,
+                "CARD",
+                "SUCCESS",
+                null
+        );
+
+        when(repository.findById("PAY-001"))
+                .thenReturn(java.util.Optional.of(payment));
+
+        PaymentService service = new PaymentService(repository);
+
+        ReceiptResponse receipt =
+                service.generateReceipt("PAY-001");
+
+        assertEquals("RID-001", receipt.getRideId());
+        assertEquals(785.0, receipt.getAmount());
+        assertEquals("CARD", receipt.getPaymentMethod());
+        assertEquals("SUCCESS", receipt.getStatus());
+        assertEquals(
+                "Payment completed successfully",
+                receipt.getReceiptMessage()
+        );
 
         verify(repository, times(1)).findById("PAY-001");
     }
