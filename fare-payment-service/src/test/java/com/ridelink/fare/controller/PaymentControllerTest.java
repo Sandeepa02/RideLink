@@ -10,6 +10,11 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ConstraintViolation;
 import java.util.Set;
+import com.ridelink.fare.exception.GlobalExceptionHandler;
+import com.ridelink.fare.exception.ResourceNotFoundException;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -150,5 +155,25 @@ class PaymentControllerTest {
                 validator.validate(request);
 
         assertEquals(4, violations.size());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenPaymentDoesNotExist() {
+
+        ResourceNotFoundException exception =
+                new ResourceNotFoundException("Payment not found: PAY-999");
+
+        GlobalExceptionHandler handler =
+                new GlobalExceptionHandler();
+
+        ResponseEntity<Map<String, Object>> response =
+                handler.handleResourceNotFound(exception);
+
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals("Not Found", response.getBody().get("error"));
+        assertEquals(
+                "Payment not found: PAY-999",
+                response.getBody().get("message")
+        );
     }
 }

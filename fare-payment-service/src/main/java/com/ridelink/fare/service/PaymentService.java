@@ -1,6 +1,7 @@
 package com.ridelink.fare.service;
 
 import com.ridelink.fare.dto.ReceiptResponse;
+import com.ridelink.fare.exception.ResourceNotFoundException;
 import com.ridelink.fare.model.Payment;
 import com.ridelink.fare.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class PaymentService {
     public Payment getPaymentById(String paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() ->
-                        new RuntimeException("Payment not found: " + paymentId)
+                        new ResourceNotFoundException("Payment not found: " + paymentId)
                 );
     }
 
