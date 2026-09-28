@@ -1,4 +1,4 @@
-package com.ridelink.driver_service;
+package com.ridelink.driverservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
