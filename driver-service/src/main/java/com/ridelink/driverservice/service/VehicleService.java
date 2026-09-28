@@ -24,9 +24,9 @@ public class VehicleService {
     }
 
     public Vehicle getVehicleById(String id) {
-        return vehicleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
-    }
+    return vehicleRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+}
 
     public List<Vehicle> getVehiclesByDriverId(String driverId) {
         return vehicleRepository.findByDriverId(driverId);

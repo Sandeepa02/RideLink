@@ -2,6 +2,7 @@ package com.ridelink.driverservice.controller;
 
 import com.ridelink.driverservice.model.Vehicle;
 import com.ridelink.driverservice.service.VehicleService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class VehicleController {
 
     @PostMapping
     public ResponseEntity<Vehicle> createVehicle(
-            @RequestBody Vehicle vehicle) {
+            @Valid @RequestBody Vehicle vehicle) {
 
         return new ResponseEntity<>(
                 vehicleService.createVehicle(vehicle),
@@ -56,7 +57,7 @@ public class VehicleController {
     @PutMapping("/{id}")
     public ResponseEntity<Vehicle> updateVehicle(
             @PathVariable String id,
-            @RequestBody Vehicle vehicle) {
+            @Valid @RequestBody Vehicle vehicle) {
 
         return ResponseEntity.ok(
                 vehicleService.updateVehicle(id, vehicle)

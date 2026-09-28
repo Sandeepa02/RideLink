@@ -24,9 +24,9 @@ public class DriverService {
     }
 
     public Driver getDriverById(String id) {
-        return driverRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
-    }
+    return driverRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Driver not found"));
+}
 
     public Driver updateDriver(String id, Driver updatedDriver) {
         Driver existingDriver = getDriverById(id);

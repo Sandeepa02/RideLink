@@ -1,5 +1,6 @@
 package com.ridelink.driverservice.model;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,10 +10,19 @@ public class Vehicle {
     @Id
     private String id;
 
+    @NotBlank(message = "Driver ID is required")
     private String driverId;
+
+    @NotBlank(message = "Registration number is required")
     private String registrationNumber;
+
+    @NotBlank(message = "Vehicle type is required")
     private String vehicleType;
+
+    @NotBlank(message = "Vehicle model is required")
     private String model;
+
+    @NotBlank(message = "Vehicle colour is required")
     private String colour;
 
     public Vehicle() {
