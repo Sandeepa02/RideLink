@@ -21,7 +21,7 @@ public class FareController {
 
     @PostMapping("/estimate")
     public FareEstimateResponse estimateFare(
-            @RequestBody FareEstimateRequest request) {
+            @Valid @RequestBody FareEstimateRequest request) {
 
         Fare fare = fareService.createFare(
                 request.getRideId(),
