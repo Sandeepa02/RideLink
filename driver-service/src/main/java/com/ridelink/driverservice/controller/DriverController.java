@@ -5,6 +5,9 @@ import com.ridelink.driverservice.service.DriverService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +23,7 @@ public class DriverController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<Driver> createDriver(
             @Valid @RequestBody Driver driver) {
 
@@ -30,6 +34,7 @@ public class DriverController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Driver>> getAllDrivers() {
         return ResponseEntity.ok(
                 driverService.getAllDrivers()
@@ -37,18 +42,40 @@ public class DriverController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<Driver> getDriverById(
             @PathVariable String id) {
 
-        return ResponseEntity.ok(
-                driverService.getDriverById(id)
-        );
+        Driver driver = driverService.getDriverById(id);
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (!isAdmin(authentication)
+                && !driver.getAccountId().equals(authentication.getName())) {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(driver);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<Driver> updateDriver(
             @PathVariable String id,
             @Valid @RequestBody Driver driver) {
+
+        Driver existingDriver = driverService.getDriverById(id);
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (!isAdmin(authentication)
+                && !existingDriver.getAccountId().equals(authentication.getName())) {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         return ResponseEntity.ok(
                 driverService.updateDriver(id, driver)
@@ -56,6 +83,7 @@ public class DriverController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDriver(
             @PathVariable String id) {
 
@@ -64,6 +92,7 @@ public class DriverController {
     }
 
     @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('PASSENGER', 'ADMIN')")
     public ResponseEntity<List<Driver>> getAvailableDrivers() {
         return ResponseEntity.ok(
                 driverService.getAvailableDrivers()
@@ -71,6 +100,7 @@ public class DriverController {
     }
 
     @GetMapping("/available/area")
+    @PreAuthorize("hasAnyRole('PASSENGER', 'ADMIN')")
     public ResponseEntity<List<Driver>> getAvailableDriversByArea(
             @RequestParam String serviceArea) {
 
@@ -80,9 +110,21 @@ public class DriverController {
     }
 
     @PutMapping("/{id}/availability")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<Driver> updateAvailability(
             @PathVariable String id,
             @RequestParam String status) {
+
+        Driver existingDriver = driverService.getDriverById(id);
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (!isAdmin(authentication)
+                && !existingDriver.getAccountId().equals(authentication.getName())) {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         return ResponseEntity.ok(
                 driverService.updateAvailability(id, status)
@@ -90,10 +132,22 @@ public class DriverController {
     }
 
     @PutMapping("/{id}/location")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
     public ResponseEntity<Driver> updateLocation(
             @PathVariable String id,
             @RequestParam Double latitude,
             @RequestParam Double longitude) {
+
+        Driver existingDriver = driverService.getDriverById(id);
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (!isAdmin(authentication)
+                && !existingDriver.getAccountId().equals(authentication.getName())) {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         return ResponseEntity.ok(
                 driverService.updateLocation(
@@ -102,5 +156,11 @@ public class DriverController {
                         longitude
                 )
         );
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }
