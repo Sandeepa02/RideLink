@@ -1,5 +1,7 @@
 package com.ridelink.driverservice.controller;
 
+import com.ridelink.driverservice.dto.AssignDriverRequest;
+import com.ridelink.driverservice.dto.DriverAssignmentResponse;
 import com.ridelink.driverservice.model.Driver;
 import com.ridelink.driverservice.service.DriverService;
 import jakarta.validation.Valid;
@@ -155,6 +157,20 @@ public class DriverController {
                         latitude,
                         longitude
                 )
+        );
+    }
+
+    // ================================
+    // DRIVER ASSIGNMENT ENDPOINT
+    // ================================
+
+    @PostMapping("/assign")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RIDE_SERVICE')")
+    public ResponseEntity<DriverAssignmentResponse> assignDriver(
+            @Valid @RequestBody AssignDriverRequest request) {
+
+        return ResponseEntity.ok(
+                driverService.assignDriver(request)
         );
     }
 

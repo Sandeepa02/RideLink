@@ -38,6 +38,8 @@ public class Driver {
     @NotBlank(message = "Service area is required")
     private String serviceArea;
 
+    private String currentRideId;
+
     public Driver() {
     }
 
@@ -51,6 +53,7 @@ public class Driver {
         this.latitude = latitude;
         this.longitude = longitude;
         this.serviceArea = serviceArea;
+        this.currentRideId = null;
     }
 
     public String getId() {
@@ -115,5 +118,13 @@ public class Driver {
 
     public void setServiceArea(String serviceArea) {
         this.serviceArea = serviceArea;
+    }
+
+    public String getCurrentRideId() {
+        return currentRideId;
+    }
+
+    public void setCurrentRideId(String currentRideId) {
+        this.currentRideId = currentRideId;
     }
 }
