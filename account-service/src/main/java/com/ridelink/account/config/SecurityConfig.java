@@ -45,11 +45,13 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/accounts/register",
-                                "/api/accounts/login",
-                                "/error"
-                        ).permitAll()
+                .requestMatchers(
+                        "/api/accounts/register",
+                        "/api/accounts/login",
+                        "/error",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
+                ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

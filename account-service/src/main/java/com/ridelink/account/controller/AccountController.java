@@ -8,11 +8,12 @@ import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.dto.UpdateRoleRequest;
 import com.ridelink.account.dto.UpdateStatusRequest;
 import com.ridelink.account.model.Account;
-import jakarta.validation.Valid;
 import com.ridelink.account.service.AccountService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,13 +26,13 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-   @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<AccountResponse> register(
-        @Valid @RequestBody RegisterRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
 
-    Account account = accountService.register(request);
-    return ResponseEntity.ok(AccountResponse.from(account));
-}
+        Account account = accountService.register(request);
+        return ResponseEntity.ok(AccountResponse.from(account));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
@@ -45,6 +46,7 @@ public class AccountController {
     }
 
     @GetMapping("/me")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AccountResponse> getMyProfile(
             Authentication authentication) {
 
@@ -56,6 +58,7 @@ public class AccountController {
     }
 
     @PutMapping("/me")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AccountResponse> updateMyProfile(
             Authentication authentication,
             @Valid @RequestBody UpdateProfileRequest request) {
@@ -68,6 +71,7 @@ public class AccountController {
     }
 
     @PutMapping("/role")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AccountResponse> updateRole(
             @RequestParam String email,
@@ -79,6 +83,7 @@ public class AccountController {
     }
 
     @PutMapping("/status")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AccountResponse> updateStatus(
             @RequestParam String email,
