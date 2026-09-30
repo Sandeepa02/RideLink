@@ -3,6 +3,7 @@ package com.ridelink.fare.service;
 import com.ridelink.fare.dto.ReceiptResponse;
 import com.ridelink.fare.exception.ResourceNotFoundException;
 import com.ridelink.fare.model.Payment;
+import com.ridelink.fare.repository.FareRepository;
 import com.ridelink.fare.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,15 +13,28 @@ import java.time.LocalDateTime;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final FareRepository fareRepository;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(
+            PaymentRepository paymentRepository,
+            FareRepository fareRepository) {
+
         this.paymentRepository = paymentRepository;
+        this.fareRepository = fareRepository;
     }
 
-    public Payment processPayment(String rideId,
-                                  String fareId,
-                                  double amount,
-                                  String paymentMethod) {
+    public Payment processPayment(
+            String rideId,
+            String fareId,
+            double amount,
+            String paymentMethod) {
+
+        fareRepository.findById(fareId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Fare not found: " + fareId
+                        )
+                );
 
         String status;
 
@@ -43,9 +57,12 @@ public class PaymentService {
     }
 
     public Payment getPaymentById(String paymentId) {
+
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Payment not found: " + paymentId)
+                        new ResourceNotFoundException(
+                                "Payment not found: " + paymentId
+                        )
                 );
     }
 
@@ -70,5 +87,4 @@ public class PaymentService {
                 receiptMessage
         );
     }
-
 }
