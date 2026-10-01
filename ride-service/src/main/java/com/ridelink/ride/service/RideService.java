@@ -49,7 +49,7 @@ public class RideService {
         return toResponse(savedRide);
     }
 
-    public RideResponse assignDriver(String id, String serviceToken) {
+    public RideResponse assignDriver(String id) {
 
     Ride ride = rideRepository.findById(id)
             .orElseThrow(() ->
@@ -67,8 +67,8 @@ public class RideService {
                     ride.getPickupLocation().getLongitude()
             );
 
-    DriverAssignmentResponse assignment =
-            driverServiceClient.assignDriver(request, serviceToken);
+   DriverAssignmentResponse assignment =
+        driverServiceClient.assignDriver(request);
 
     ride.setDriverId(assignment.getDriverId());
     ride.setStatus(RideStatus.ASSIGNED);

@@ -71,13 +71,10 @@ public class RideController {
 
     @PostMapping("/{id}/assign")
 public ResponseEntity<RideResponse> assignDriver(
-        @PathVariable String id,
-        @RequestHeader("Authorization") String authorizationHeader) {
-
-    String serviceToken = authorizationHeader.replace("Bearer ", "");
+        @PathVariable String id) {
 
     return ResponseEntity.ok(
-            rideService.assignDriver(id, serviceToken)
+            rideService.assignDriver(id)
     );
 }
 
