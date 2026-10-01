@@ -15,14 +15,23 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.ridelink.ride.client.DriverServiceClient;
+import com.ridelink.ride.dto.DriverAssignmentRequest;
+import com.ridelink.ride.dto.DriverAssignmentResponse;
+
 @Service
 public class RideService {
 
     private final RideRepository rideRepository;
+    private final DriverServiceClient driverServiceClient;
 
-    public RideService(RideRepository rideRepository) {
-        this.rideRepository = rideRepository;
-    }
+    public RideService(
+        RideRepository rideRepository,
+        DriverServiceClient driverServiceClient) {
+
+    this.rideRepository = rideRepository;
+    this.driverServiceClient = driverServiceClient;
+}
 
     public RideResponse createRide(CreateRideRequest request) {
 
@@ -39,6 +48,35 @@ public class RideService {
 
         return toResponse(savedRide);
     }
+
+    public RideResponse assignDriver(String id, String serviceToken) {
+
+    Ride ride = rideRepository.findById(id)
+            .orElseThrow(() ->
+                    new RideNotFoundException("Ride not found with id: " + id));
+
+    if (ride.getStatus() != RideStatus.REQUESTED) {
+        throw new InvalidRideStatusException(
+                "Driver can only be assigned to a REQUESTED ride");
+    }
+
+    DriverAssignmentRequest request =
+            new DriverAssignmentRequest(
+                    ride.getId(),
+                    ride.getPickupLocation().getLatitude(),
+                    ride.getPickupLocation().getLongitude()
+            );
+
+    DriverAssignmentResponse assignment =
+            driverServiceClient.assignDriver(request, serviceToken);
+
+    ride.setDriverId(assignment.getDriverId());
+    ride.setStatus(RideStatus.ASSIGNED);
+
+    Ride updatedRide = rideRepository.save(ride);
+
+    return toResponse(updatedRide);
+}
 
     public RideResponse getRideById(String id) {
 

@@ -68,4 +68,17 @@ public class RideController {
                 rideService.updateRideStatus(id, request)
         );
     }
+
+    @PostMapping("/{id}/assign")
+public ResponseEntity<RideResponse> assignDriver(
+        @PathVariable String id,
+        @RequestHeader("Authorization") String authorizationHeader) {
+
+    String serviceToken = authorizationHeader.replace("Bearer ", "");
+
+    return ResponseEntity.ok(
+            rideService.assignDriver(id, serviceToken)
+    );
+}
+
 }
