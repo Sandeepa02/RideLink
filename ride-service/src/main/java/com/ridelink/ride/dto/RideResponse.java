@@ -22,6 +22,12 @@ public class RideResponse {
 
     private Double finalFare;
 
+    private Double distanceKm;
+
+    private Integer estimatedDurationMinutes;
+
+    private String fareId;
+
     private LocalDateTime requestedAt;
 
     private LocalDateTime acceptedAt;
@@ -97,6 +103,30 @@ public class RideResponse {
 
     public void setFinalFare(Double finalFare) {
         this.finalFare = finalFare;
+    }
+
+    public Double getDistanceKm() {
+        return distanceKm;
+    }
+
+    public void setDistanceKm(Double distanceKm) {
+        this.distanceKm = distanceKm;
+    }
+
+    public Integer getEstimatedDurationMinutes() {
+        return estimatedDurationMinutes;
+    }
+
+    public void setEstimatedDurationMinutes(Integer estimatedDurationMinutes) {
+        this.estimatedDurationMinutes = estimatedDurationMinutes;
+    }
+
+    public String getFareId() {
+        return fareId;
+    }
+
+    public void setFareId(String fareId) {
+        this.fareId = fareId;
     }
 
     public LocalDateTime getRequestedAt() {

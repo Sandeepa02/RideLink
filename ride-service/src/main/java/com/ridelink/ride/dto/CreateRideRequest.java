@@ -3,6 +3,7 @@ package com.ridelink.ride.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class CreateRideRequest {
 
@@ -17,9 +18,18 @@ public class CreateRideRequest {
     @Valid
     private LocationRequest destinationLocation;
 
+    @NotNull(message = "Distance is required")
+    @Positive(message = "Distance must be greater than 0")
+    private Double distanceKm;
+
+    @NotNull(message = "Estimated duration is required")
+    @Positive(message = "Estimated duration must be greater than 0")
+    private Integer estimatedDurationMinutes;
+
     public CreateRideRequest() {
     }
 
+    // Existing constructor kept for backward compatibility with existing tests
     public CreateRideRequest(
             String passengerId,
             LocationRequest pickupLocation,
@@ -28,6 +38,21 @@ public class CreateRideRequest {
         this.passengerId = passengerId;
         this.pickupLocation = pickupLocation;
         this.destinationLocation = destinationLocation;
+    }
+
+    // New constructor for Fare Service integration
+    public CreateRideRequest(
+            String passengerId,
+            LocationRequest pickupLocation,
+            LocationRequest destinationLocation,
+            Double distanceKm,
+            Integer estimatedDurationMinutes) {
+
+        this.passengerId = passengerId;
+        this.pickupLocation = pickupLocation;
+        this.destinationLocation = destinationLocation;
+        this.distanceKm = distanceKm;
+        this.estimatedDurationMinutes = estimatedDurationMinutes;
     }
 
     public String getPassengerId() {
@@ -52,5 +77,21 @@ public class CreateRideRequest {
 
     public void setDestinationLocation(LocationRequest destinationLocation) {
         this.destinationLocation = destinationLocation;
+    }
+
+    public Double getDistanceKm() {
+        return distanceKm;
+    }
+
+    public void setDistanceKm(Double distanceKm) {
+        this.distanceKm = distanceKm;
+    }
+
+    public Integer getEstimatedDurationMinutes() {
+        return estimatedDurationMinutes;
+    }
+
+    public void setEstimatedDurationMinutes(Integer estimatedDurationMinutes) {
+        this.estimatedDurationMinutes = estimatedDurationMinutes;
     }
 }
