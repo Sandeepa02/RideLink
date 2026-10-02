@@ -28,10 +28,10 @@ public class FareController {
     @Operation(
             summary = "Estimate fare",
             description = "Calculates an estimated fare using the estimated distance and duration."
-    )
-    @PostMapping("/estimate")
-    public FareEstimateResponse estimateFare(
-            @Valid @RequestBody FareEstimateRequest request) {
+        )
+        @PostMapping("/estimate")
+        public FareEstimateResponse estimateFare(
+                @Valid @RequestBody FareEstimateRequest request) {
 
         Fare fare = fareService.createFare(
                 request.getRideId(),
@@ -41,6 +41,7 @@ public class FareController {
         );
 
         return new FareEstimateResponse(
+                fare.getId(),
                 fare.getRideId(),
                 fare.getTotalFare()
         );
@@ -49,10 +50,10 @@ public class FareController {
     @Operation(
             summary = "Calculate final fare",
             description = "Calculates the final fare using the actual distance and duration."
-    )
-    @PostMapping("/final")
-    public FinalFareResponse calculateFinalFare(
-            @Valid @RequestBody FinalFareRequest request) {
+        )
+        @PostMapping("/final")
+        public FinalFareResponse calculateFinalFare(
+                @Valid @RequestBody FinalFareRequest request) {
 
         Fare fare = fareService.createFare(
                 request.getRideId(),
