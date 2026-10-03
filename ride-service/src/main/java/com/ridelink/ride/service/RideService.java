@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import com.ridelink.ride.client.DriverServiceClient;
 import com.ridelink.ride.dto.DriverAssignmentRequest;
@@ -45,6 +46,7 @@ public class RideService {
 
     Ride ride = new Ride();
 
+    ride.setId(UUID.randomUUID().toString());
     ride.setPassengerId(request.getPassengerId());
     ride.setPickupLocation(toLocation(request.getPickupLocation()));
     ride.setDestinationLocation(toLocation(request.getDestinationLocation()));
@@ -56,14 +58,11 @@ public class RideService {
     ride.setStatus(RideStatus.REQUESTED);
     ride.setRequestedAt(LocalDateTime.now());
 
-    // Save first so MongoDB generates the ride ID.
-    Ride savedRide = rideRepository.save(ride);
-
     FareEstimateRequest fareRequest =
             new FareEstimateRequest(
-                    savedRide.getId(),
-                    savedRide.getDistanceKm(),
-                    savedRide.getEstimatedDurationMinutes()
+                    ride.getId(),
+                    ride.getDistanceKm(),
+                    ride.getEstimatedDurationMinutes()
             );
 
     FareEstimateResponse fareResponse =
@@ -72,12 +71,12 @@ public class RideService {
                     authorizationHeader
             );
 
-    savedRide.setFareId(fareResponse.getFareId());
-    savedRide.setEstimatedFare(fareResponse.getEstimatedFare());
+    ride.setFareId(fareResponse.getFareId());
+    ride.setEstimatedFare(fareResponse.getEstimatedFare());
 
-    Ride updatedRide = rideRepository.save(savedRide);
+    Ride savedRide = rideRepository.save(ride);
 
-    return toResponse(updatedRide);
+    return toResponse(savedRide);
 }
 
     public RideResponse assignDriver(String id) {

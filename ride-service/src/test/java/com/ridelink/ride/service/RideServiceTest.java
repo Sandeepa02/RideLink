@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ridelink.ride.client.FareServiceClient;
 import com.ridelink.ride.dto.FareEstimateRequest;
 import com.ridelink.ride.dto.FareEstimateResponse;
+import org.springframework.web.client.RestClientException;
 
 import java.util.Optional;
 
@@ -31,6 +32,7 @@ class RideServiceTest {
 
     @Mock
     private RideRepository rideRepository;
+
     @Mock
     private FareServiceClient fareServiceClient;
 
@@ -62,54 +64,47 @@ class RideServiceTest {
         );
     }
 
-@Test
-void shouldCreateRideWithRequestedStatus() {
+    @Test
+    void shouldCreateRideWithRequestedStatus() {
 
-   
+        when(rideRepository.save(any(Ride.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-    when(rideRepository.save(any(Ride.class)))
-            .thenAnswer(invocation -> {
-                Ride ride = invocation.getArgument(0);
-                ride.setId("ride-001");
-                return ride;
-            });
+        FareEstimateResponse fareResponse =
+                new FareEstimateResponse();
 
-    FareEstimateResponse fareResponse =
-            new FareEstimateResponse();
+        fareResponse.setFareId("fare-001");
+        fareResponse.setEstimatedFare(745.0);
 
-    fareResponse.setFareId("fare-001");
-    fareResponse.setRideId("ride-001");
-    fareResponse.setEstimatedFare(745.0);
+        when(fareServiceClient.estimateFare(
+                any(FareEstimateRequest.class),
+                eq("Bearer test-rider-token")
+        )).thenReturn(fareResponse);
 
-    when(fareServiceClient.estimateFare(
-            any(FareEstimateRequest.class),
-            eq("Bearer test-rider-token")
-    )).thenReturn(fareResponse);
+        RideResponse response =
+                rideService.createRide(
+                        createRequest,
+                        "Bearer test-rider-token"
+                );
 
-    RideResponse response =
-            rideService.createRide(
-                    createRequest,
-                    "Bearer test-rider-token"
-            );
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals("passenger-001", response.getPassengerId());
+        assertEquals(RideStatus.REQUESTED, response.getStatus());
+        assertEquals(8.5, response.getDistanceKm());
+        assertEquals(22, response.getEstimatedDurationMinutes());
+        assertEquals("fare-001", response.getFareId());
+        assertEquals(745.0, response.getEstimatedFare());
 
-    assertNotNull(response);
-    assertEquals("ride-001", response.getId());
-    assertEquals("passenger-001", response.getPassengerId());
-    assertEquals(RideStatus.REQUESTED, response.getStatus());
-    assertEquals(8.5, response.getDistanceKm());
-    assertEquals(22, response.getEstimatedDurationMinutes());
-    assertEquals("fare-001", response.getFareId());
-    assertEquals(745.0, response.getEstimatedFare());
+        verify(fareServiceClient, times(1))
+                .estimateFare(
+                        any(FareEstimateRequest.class),
+                        eq("Bearer test-rider-token")
+                );
 
-    verify(fareServiceClient, times(1))
-            .estimateFare(
-                    any(FareEstimateRequest.class),
-                    eq("Bearer test-rider-token")
-            );
-
-    verify(rideRepository, times(2))
-            .save(any(Ride.class));
-}
+        verify(rideRepository, times(1))
+                .save(any(Ride.class));
+    }
 
     @Test
     void shouldReturnRideWhenRideExists() {
@@ -231,4 +226,30 @@ void shouldCreateRideWithRequestedStatus() {
         assertEquals(RideStatus.CANCELLED, response.getStatus());
         assertNotNull(response.getCancelledAt());
     }
+
+    @Test
+    void shouldNotSaveRideWhenFareServiceFails() {
+
+        when(fareServiceClient.estimateFare(
+                any(FareEstimateRequest.class),
+                eq("Bearer test-rider-token")
+        )).thenThrow(new RestClientException("Fare Service unavailable"));
+
+        assertThrows(
+                RestClientException.class,
+                () -> rideService.createRide(
+                        createRequest,
+                        "Bearer test-rider-token"
+                )
+        );
+
+        verify(fareServiceClient, times(1))
+                .estimateFare(
+                        any(FareEstimateRequest.class),
+                        eq("Bearer test-rider-token")
+                );
+
+        verify(rideRepository, never())
+                .save(any(Ride.class));
+        }
 }
