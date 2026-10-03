@@ -12,10 +12,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/drivers")
+@Tag(name = "Driver Management", description = "APIs for driver profiles, availability status, simulated location, and driver assignment")
+@SecurityRequirement(name = "bearerAuth")
 public class DriverController {
 
     private final DriverService driverService;
