@@ -1,0 +1,48 @@
+# CI Pipeline for Ride Management Service
+name: Ride Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ride-service/**'
+      - '.github/workflows/ride-service.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'ride-service/**'
+      - '.github/workflows/ride-service.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test Ride Service
+    runs-on: ubuntu-latest
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/ci_test
+      JWT_SECRET: ci-test-jwt-secret-key-32-bytes-minimum-length-for-hmac
+      DRIVER_SERVICE_TOKEN: ci-test-driver-token
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: ride-service/pom.xml
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x ride-service/mvnw
+
+      - name: Run unit tests
+        working-directory: ride-service
+        run: ./mvnw test
