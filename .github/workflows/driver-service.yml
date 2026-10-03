@@ -1,0 +1,47 @@
+# CI Pipeline for Driver & Vehicle Service
+name: Driver Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'driver-service/**'
+      - '.github/workflows/driver-service.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'driver-service/**'
+      - '.github/workflows/driver-service.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test Driver Service
+    runs-on: ubuntu-latest
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/ci_test
+      JWT_SECRET: ci-test-jwt-secret-key-32-bytes-minimum-length-for-hmac
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: driver-service/pom.xml
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x driver-service/mvnw
+
+      - name: Run unit tests
+        working-directory: driver-service
+        run: ./mvnw test
