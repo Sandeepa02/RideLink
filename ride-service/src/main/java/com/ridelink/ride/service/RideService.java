@@ -8,7 +8,7 @@ import com.ridelink.ride.dto.RideResponse;
 import com.ridelink.ride.dto.UpdateRideStatusRequest;
 import com.ridelink.ride.model.Location;
 import com.ridelink.ride.model.Ride;
-import com.ridelink.ride.model.RideStatus;
+import com.ridelink.ride.model.RideStatus;  
 import com.ridelink.ride.repository.RideRepository;
 import org.springframework.stereotype.Service;
 
@@ -18,36 +18,67 @@ import java.util.List;
 import com.ridelink.ride.client.DriverServiceClient;
 import com.ridelink.ride.dto.DriverAssignmentRequest;
 import com.ridelink.ride.dto.DriverAssignmentResponse;
+import com.ridelink.ride.client.FareServiceClient;
+import com.ridelink.ride.dto.FareEstimateRequest;
+import com.ridelink.ride.dto.FareEstimateResponse;
 
 @Service
 public class RideService {
 
     private final RideRepository rideRepository;
     private final DriverServiceClient driverServiceClient;
+    private final FareServiceClient fareServiceClient;
 
     public RideService(
         RideRepository rideRepository,
-        DriverServiceClient driverServiceClient) {
+        DriverServiceClient driverServiceClient,
+        FareServiceClient fareServiceClient) {
 
     this.rideRepository = rideRepository;
     this.driverServiceClient = driverServiceClient;
-}
-
-    public RideResponse createRide(CreateRideRequest request) {
-
-        Ride ride = new Ride();
-
-        ride.setPassengerId(request.getPassengerId());
-        ride.setPickupLocation(toLocation(request.getPickupLocation()));
-        ride.setDestinationLocation(toLocation(request.getDestinationLocation()));
-
-        ride.setStatus(RideStatus.REQUESTED);
-        ride.setRequestedAt(LocalDateTime.now());
-
-        Ride savedRide = rideRepository.save(ride);
-
-        return toResponse(savedRide);
+    this.fareServiceClient = fareServiceClient;
     }
+
+    public RideResponse createRide(
+        CreateRideRequest request,
+        String authorizationHeader) {
+
+    Ride ride = new Ride();
+
+    ride.setPassengerId(request.getPassengerId());
+    ride.setPickupLocation(toLocation(request.getPickupLocation()));
+    ride.setDestinationLocation(toLocation(request.getDestinationLocation()));
+
+    ride.setDistanceKm(request.getDistanceKm());
+    ride.setEstimatedDurationMinutes(
+            request.getEstimatedDurationMinutes());
+
+    ride.setStatus(RideStatus.REQUESTED);
+    ride.setRequestedAt(LocalDateTime.now());
+
+    // Save first so MongoDB generates the ride ID.
+    Ride savedRide = rideRepository.save(ride);
+
+    FareEstimateRequest fareRequest =
+            new FareEstimateRequest(
+                    savedRide.getId(),
+                    savedRide.getDistanceKm(),
+                    savedRide.getEstimatedDurationMinutes()
+            );
+
+    FareEstimateResponse fareResponse =
+            fareServiceClient.estimateFare(
+                    fareRequest,
+                    authorizationHeader
+            );
+
+    savedRide.setFareId(fareResponse.getFareId());
+    savedRide.setEstimatedFare(fareResponse.getEstimatedFare());
+
+    Ride updatedRide = rideRepository.save(savedRide);
+
+    return toResponse(updatedRide);
+}
 
     public RideResponse assignDriver(String id) {
 
@@ -200,6 +231,9 @@ public class RideService {
         response.setStatus(ride.getStatus());
         response.setEstimatedFare(ride.getEstimatedFare());
         response.setFinalFare(ride.getFinalFare());
+        response.setDistanceKm(ride.getDistanceKm());
+        response.setEstimatedDurationMinutes(ride.getEstimatedDurationMinutes());
+        response.setFareId(ride.getFareId());
 
         response.setRequestedAt(ride.getRequestedAt());
         response.setAcceptedAt(ride.getAcceptedAt());

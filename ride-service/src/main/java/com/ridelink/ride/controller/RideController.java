@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
 
 import java.util.List;
 
@@ -22,15 +23,17 @@ public class RideController {
     }
 
     @PostMapping
-    public ResponseEntity<RideResponse> createRide(
-            @Valid @RequestBody CreateRideRequest request) {
+public ResponseEntity<RideResponse> createRide(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+        @Valid @RequestBody CreateRideRequest request) {
 
-        RideResponse response = rideService.createRide(request);
+    RideResponse response =
+            rideService.createRide(request, authorizationHeader);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(response);
+}
 
     @GetMapping("/{id}")
     public ResponseEntity<RideResponse> getRideById(

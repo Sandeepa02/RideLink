@@ -15,11 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.ridelink.ride.client.FareServiceClient;
+import com.ridelink.ride.dto.FareEstimateRequest;
+import com.ridelink.ride.dto.FareEstimateResponse;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +31,8 @@ class RideServiceTest {
 
     @Mock
     private RideRepository rideRepository;
+    @Mock
+    private FareServiceClient fareServiceClient;
 
     @InjectMocks
     private RideService rideService;
@@ -50,31 +56,60 @@ class RideServiceTest {
         createRequest = new CreateRideRequest(
                 "passenger-001",
                 pickup,
-                destination
+                destination,
+                8.5,
+                22
         );
     }
 
-    @Test
-    void shouldCreateRideWithRequestedStatus() {
+@Test
+void shouldCreateRideWithRequestedStatus() {
 
-        Ride savedRide = new Ride();
-        savedRide.setId("ride-001");
-        savedRide.setPassengerId("passenger-001");
-        savedRide.setStatus(RideStatus.REQUESTED);
+   
 
-        when(rideRepository.save(any(Ride.class)))
-                .thenReturn(savedRide);
+    when(rideRepository.save(any(Ride.class)))
+            .thenAnswer(invocation -> {
+                Ride ride = invocation.getArgument(0);
+                ride.setId("ride-001");
+                return ride;
+            });
 
-        RideResponse response = rideService.createRide(createRequest);
+    FareEstimateResponse fareResponse =
+            new FareEstimateResponse();
 
-        assertNotNull(response);
-        assertEquals("ride-001", response.getId());
-        assertEquals("passenger-001", response.getPassengerId());
-        assertEquals(RideStatus.REQUESTED, response.getStatus());
+    fareResponse.setFareId("fare-001");
+    fareResponse.setRideId("ride-001");
+    fareResponse.setEstimatedFare(745.0);
 
-        verify(rideRepository, times(1))
-                .save(any(Ride.class));
-    }
+    when(fareServiceClient.estimateFare(
+            any(FareEstimateRequest.class),
+            eq("Bearer test-rider-token")
+    )).thenReturn(fareResponse);
+
+    RideResponse response =
+            rideService.createRide(
+                    createRequest,
+                    "Bearer test-rider-token"
+            );
+
+    assertNotNull(response);
+    assertEquals("ride-001", response.getId());
+    assertEquals("passenger-001", response.getPassengerId());
+    assertEquals(RideStatus.REQUESTED, response.getStatus());
+    assertEquals(8.5, response.getDistanceKm());
+    assertEquals(22, response.getEstimatedDurationMinutes());
+    assertEquals("fare-001", response.getFareId());
+    assertEquals(745.0, response.getEstimatedFare());
+
+    verify(fareServiceClient, times(1))
+            .estimateFare(
+                    any(FareEstimateRequest.class),
+                    eq("Bearer test-rider-token")
+            );
+
+    verify(rideRepository, times(2))
+            .save(any(Ride.class));
+}
 
     @Test
     void shouldReturnRideWhenRideExists() {
